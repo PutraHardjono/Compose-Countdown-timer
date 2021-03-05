@@ -16,46 +16,49 @@
 package com.example.androiddevchallenge
 
 import android.os.Bundle
-import android.os.CountDownTimer
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.animateColor
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedButton
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.androiddevchallenge.ui.theme.MyTheme
-import java.util.concurrent.TimeUnit
-
 
 class MainActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<MainViewModel>()
 
-    @ExperimentalAnimationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MyTheme {
+            MyTheme(true) {
                 TimerApp(viewModel = viewModel)
             }
         }
@@ -64,31 +67,47 @@ class MainActivity : AppCompatActivity() {
 
 @Composable
 fun TimerApp(viewModel: MainViewModel) {
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .fillMaxHeight(),
-        verticalArrangement = Arrangement.Center
-    ) {
-        BoxCountDownProgress(viewModel, Modifier.align(Alignment.CenterHorizontally))
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-            IconButton(onClick = {
-                viewModel.pauseTimer()
-            }) {
-                Icon(imageVector = Icons.Filled.Pause, contentDescription = null)
+    Scaffold {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.Center
+        ) {
+            when (viewModel.state) {
+                State.SETTING -> BoxSettingTime(viewModel, Modifier.align(Alignment.CenterHorizontally))
+                State.PAUSE, State.IN_PROGRESS -> BoxCountDownProgress(
+                    viewModel,
+                    Modifier.align(Alignment.CenterHorizontally)
+                )
             }
 
-            IconButton(onClick = {
-                viewModel.startTimer()
-            }) {
-                Icon(imageVector = Icons.Filled.PlayArrow, contentDescription = null)
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                OutlinedButton(
+                    onClick = {
+                        viewModel.resetTimer()
+                    }
+                ) {
+                    Icon(imageVector = Icons.Filled.Stop, contentDescription = null)
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                OutlinedButton(
+                    onClick = {
+                        when (viewModel.state) {
+                            State.IN_PROGRESS -> viewModel.pauseTimer()
+                            State.SETTING, State.PAUSE -> viewModel.startTimer()
+                        }
+                    }
+                ) {
+                    when (viewModel.state) {
+                        State.IN_PROGRESS -> Icon(imageVector = Icons.Filled.Pause, contentDescription = null)
+                        State.SETTING, State.PAUSE -> Icon(imageVector = Icons.Filled.PlayArrow, contentDescription = null)
+                    }
+                }
             }
         }
-
     }
 }
 
@@ -115,4 +134,53 @@ private fun BoxCountDownProgress(viewModel: MainViewModel, modifier: Modifier = 
             )
         }
     }
+}
+
+@Composable
+fun BoxSettingTime(viewModel: MainViewModel, modifier: Modifier = Modifier) {
+
+    Box(modifier = modifier.padding(16.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.height(300.dp)) {
+            TextInput(
+                if (viewModel.hours == 0L) "" else viewModel.hours.toString(),
+                viewModel::setHours,
+                stringResource(id = R.string.hours),
+                modifier = Modifier.width(100.dp)
+            )
+            Text(text = ":", modifier = modifier.padding(start = 8.dp, end = 8.dp))
+            TextInput(
+                if (viewModel.minutes == 0L) "" else viewModel.minutes.toString(),
+                viewModel::setMinutes,
+                stringResource(id = R.string.minutes),
+                modifier = Modifier.width(100.dp)
+            )
+            Text(text = ":", modifier = modifier.padding(start = 8.dp, end = 8.dp))
+            TextInput(
+                if (viewModel.seconds == 0L) "" else viewModel.seconds.toString(),
+                viewModel::setSeconds,
+                stringResource(id = R.string.seconds),
+                modifier = Modifier.width(100.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun TextInput(
+    textValue: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = textValue,
+        onValueChange = onValueChange,
+        placeholder = { Text(label) },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Number,
+            imeAction = ImeAction.Next,
+        ),
+        modifier = modifier
+    )
 }
