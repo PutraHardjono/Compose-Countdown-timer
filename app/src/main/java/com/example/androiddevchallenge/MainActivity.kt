@@ -158,9 +158,11 @@ fun BoxSettingTime(viewModel: MainViewModel, modifier: Modifier = Modifier) {
                     keyboardType = KeyboardType.Phone,
                     imeAction = ImeAction.Next,
                 ),
-                keyboardActions = KeyboardActions(onNext = {
-                    focusRequesterMinutes.requestFocus()
-                }),
+                keyboardActions = KeyboardActions(
+                    onNext = {
+                        focusRequesterMinutes.requestFocus()
+                    }
+                ),
                 modifier = modifier.width(100.dp)
             )
 
@@ -175,9 +177,11 @@ fun BoxSettingTime(viewModel: MainViewModel, modifier: Modifier = Modifier) {
                     keyboardType = KeyboardType.Phone,
                     imeAction = ImeAction.Next,
                 ),
-                keyboardActions = KeyboardActions(onNext = {
-                    focusRequesterHours.requestFocus()
-                }),
+                keyboardActions = KeyboardActions(
+                    onNext = {
+                        focusRequesterHours.requestFocus()
+                    }
+                ),
                 modifier = modifier.width(100.dp).focusRequester(focusRequesterMinutes)
             )
 
@@ -192,9 +196,11 @@ fun BoxSettingTime(viewModel: MainViewModel, modifier: Modifier = Modifier) {
                     keyboardType = KeyboardType.Phone,
                     imeAction = ImeAction.Done,
                 ),
-                keyboardActions = KeyboardActions(onDone = {
-                    if (viewModel.state == State.SETTING) viewModel.startTimer()
-                }),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        if (viewModel.state == State.SETTING) viewModel.startTimer()
+                    }
+                ),
                 modifier = modifier.width(100.dp).focusRequester(focusRequesterHours)
             )
         }

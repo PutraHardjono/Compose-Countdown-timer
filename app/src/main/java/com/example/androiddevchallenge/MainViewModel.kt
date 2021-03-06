@@ -45,7 +45,7 @@ class MainViewModel : ViewModel() {
     var progress by mutableStateOf(0f)
         private set
 
-    fun isStopButtonEnabled() : Boolean {
+    fun isStopButtonEnabled(): Boolean {
         return state == State.IN_PROGRESS || state == State.PAUSE
     }
 
