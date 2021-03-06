@@ -155,7 +155,7 @@ fun BoxSettingTime(viewModel: MainViewModel, modifier: Modifier = Modifier) {
                 placeholder = { Text(stringResource(id = R.string.hours)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
+                    keyboardType = KeyboardType.Phone,
                     imeAction = ImeAction.Next,
                 ),
                 keyboardActions = KeyboardActions(onNext = {
@@ -172,7 +172,7 @@ fun BoxSettingTime(viewModel: MainViewModel, modifier: Modifier = Modifier) {
                 placeholder = { Text(stringResource(id = R.string.minutes)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
+                    keyboardType = KeyboardType.Phone,
                     imeAction = ImeAction.Next,
                 ),
                 keyboardActions = KeyboardActions(onNext = {
@@ -189,7 +189,7 @@ fun BoxSettingTime(viewModel: MainViewModel, modifier: Modifier = Modifier) {
                 placeholder = { Text(stringResource(id = R.string.seconds)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
+                    keyboardType = KeyboardType.Phone,
                     imeAction = ImeAction.Done,
                 ),
                 keyboardActions = KeyboardActions(onDone = {
