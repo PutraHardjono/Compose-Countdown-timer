@@ -11,7 +11,7 @@
       -->
     <string name="app_name">AndroidDevChallenge</string>
 
-    <string name="hours">Hours</string>
-    <string name="minutes">Minutes</string>
-    <string name="seconds">Seconds</string>
+    <string name="hours">Hour</string>
+    <string name="minutes">Minute</string>
+    <string name="seconds">Second</string>
 </resources>

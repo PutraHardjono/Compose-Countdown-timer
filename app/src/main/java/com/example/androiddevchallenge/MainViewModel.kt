@@ -45,6 +45,18 @@ class MainViewModel : ViewModel() {
     var progress by mutableStateOf(0f)
         private set
 
+    fun isStopButtonEnabled() : Boolean {
+        return state == State.IN_PROGRESS || state == State.PAUSE
+    }
+
+    fun isPlayButtonEnabled(): Boolean {
+        return when {
+            state == State.SETTING && (hours != 0L || minutes != 0L || seconds != 0L) -> true
+            state == State.IN_PROGRESS || state == State.PAUSE -> true
+            else -> false
+        }
+    }
+
     // totalMilliSecond with value being updated
     private var totalMilli = 0L
 

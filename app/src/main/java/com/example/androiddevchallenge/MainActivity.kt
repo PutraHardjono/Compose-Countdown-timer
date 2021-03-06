@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
@@ -43,8 +44,11 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -88,7 +92,8 @@ fun TimerApp(viewModel: MainViewModel) {
                 OutlinedButton(
                     onClick = {
                         viewModel.resetTimer()
-                    }
+                    },
+                    enabled = viewModel.isStopButtonEnabled()
                 ) {
                     Icon(imageVector = Icons.Filled.Stop, contentDescription = null)
                 }
@@ -99,7 +104,8 @@ fun TimerApp(viewModel: MainViewModel) {
                             State.IN_PROGRESS -> viewModel.pauseTimer()
                             State.SETTING, State.PAUSE -> viewModel.startTimer()
                         }
-                    }
+                    },
+                    enabled = viewModel.isPlayButtonEnabled()
                 ) {
                     when (viewModel.state) {
                         State.IN_PROGRESS -> Icon(imageVector = Icons.Filled.Pause, contentDescription = null)
@@ -121,7 +127,7 @@ private fun BoxCountDownProgress(viewModel: MainViewModel, modifier: Modifier = 
             progress = viewModel.progress,
             strokeWidth = 13.dp,
             modifier = Modifier
-                .height(300.dp)
+                .height(250.dp)
                 .aspectRatio(1f)
                 .align(Alignment.Center)
         )
@@ -129,7 +135,7 @@ private fun BoxCountDownProgress(viewModel: MainViewModel, modifier: Modifier = 
         Column(modifier = Modifier.align(Alignment.Center)) {
             Text(
                 text = viewModel.timerText,
-                style = MaterialTheme.typography.h2,
+                style = MaterialTheme.typography.h3,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
         }
@@ -138,49 +144,59 @@ private fun BoxCountDownProgress(viewModel: MainViewModel, modifier: Modifier = 
 
 @Composable
 fun BoxSettingTime(viewModel: MainViewModel, modifier: Modifier = Modifier) {
+    val focusRequesterMinutes = remember { FocusRequester() }
+    val focusRequesterHours = remember { FocusRequester() }
 
     Box(modifier = modifier.padding(16.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.height(300.dp)) {
-            TextInput(
-                if (viewModel.hours == 0L) "" else viewModel.hours.toString(),
-                viewModel::setHours,
-                stringResource(id = R.string.hours),
-                modifier = Modifier.width(100.dp)
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.height(250.dp)) {
+            OutlinedTextField(
+                value = if (viewModel.hours == 0L) "" else viewModel.hours.toString(),
+                onValueChange = viewModel::setHours,
+                placeholder = { Text(stringResource(id = R.string.hours)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next,
+                ),
+                keyboardActions = KeyboardActions(onNext = {
+                    focusRequesterMinutes.requestFocus()
+                }),
+                modifier = modifier.width(100.dp)
             )
+
             Text(text = ":", modifier = modifier.padding(start = 8.dp, end = 8.dp))
-            TextInput(
-                if (viewModel.minutes == 0L) "" else viewModel.minutes.toString(),
-                viewModel::setMinutes,
-                stringResource(id = R.string.minutes),
-                modifier = Modifier.width(100.dp)
+
+            OutlinedTextField(
+                value = if (viewModel.minutes == 0L) "" else viewModel.minutes.toString(),
+                onValueChange = viewModel::setMinutes,
+                placeholder = { Text(stringResource(id = R.string.minutes)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next,
+                ),
+                keyboardActions = KeyboardActions(onNext = {
+                    focusRequesterHours.requestFocus()
+                }),
+                modifier = modifier.width(100.dp).focusRequester(focusRequesterMinutes)
             )
+
             Text(text = ":", modifier = modifier.padding(start = 8.dp, end = 8.dp))
-            TextInput(
-                if (viewModel.seconds == 0L) "" else viewModel.seconds.toString(),
-                viewModel::setSeconds,
-                stringResource(id = R.string.seconds),
-                modifier = Modifier.width(100.dp)
+
+            OutlinedTextField(
+                value = if (viewModel.seconds == 0L) "" else viewModel.seconds.toString(),
+                onValueChange = viewModel::setSeconds,
+                placeholder = { Text(stringResource(id = R.string.seconds)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done,
+                ),
+                keyboardActions = KeyboardActions(onDone = {
+                    if (viewModel.state == State.SETTING) viewModel.startTimer()
+                }),
+                modifier = modifier.width(100.dp).focusRequester(focusRequesterHours)
             )
         }
     }
-}
-
-@Composable
-private fun TextInput(
-    textValue: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    modifier: Modifier = Modifier
-) {
-    OutlinedTextField(
-        value = textValue,
-        onValueChange = onValueChange,
-        placeholder = { Text(label) },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Number,
-            imeAction = ImeAction.Next,
-        ),
-        modifier = modifier
-    )
 }
